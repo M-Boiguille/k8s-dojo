@@ -1,0 +1,30 @@
+/* Reset & base */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', system-ui, sans-serif; background: #0f172a; color: #e2e8f0; padding: 2rem; line-height: 1.6; }
+.container { max-width: 1200px; margin: 0 auto; }
+
+/* Header */
+.header { text-align: center; padding: 2rem 0; border-bottom: 1px solid #1e293b; margin-bottom: 2rem; }
+.header h1 { font-size: 2.5rem; font-weight: 700; background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.header p { color: #94a3b8; margin-top: 0.5rem; }
+
+/* Grid */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 2rem 0; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin: 2rem 0; }
+
+/* Cards */
+.card { background: #1e293b; border-radius: 16px; padding: 1.5rem; border: 1px solid #334155; }
+.card h2 { font-size: 1.1rem; color: #94a3b8; margin-bottom: 0.5rem; }
+.card .value { font-size: 2.5rem; font-weight: 700; color: #f1f5f9; }
+.card .label { font-size: 0.9rem; color: #94a3b8; }
+
+/* Badges */
+.badge-list { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.badge { background: #3b82f6; color: #fff; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.8rem; }
+
+/* Charts */
+.chart-container { background: #1e293b; border-radius: 16px; padding: 1.5rem; margin: 1.5rem 0; border: 1px solid #334155; }
+.chart-container canvas { max-height: 250px; }
+
+/* Footer */
+.footer { margin-top: 3rem; text-align: center; color: #475569; font-size: 0.9rem; border-top: 1px solid #1e293b; padding-top: 2rem; }

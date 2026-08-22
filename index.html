@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K8s Dojo – Portfolio DevOps</title>
+    <link rel="stylesheet" href="./assets/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🥋 K8s Dojo</h1>
+            <p>Moteur d'apprentissage adaptatif Kubernetes & DevOps — progression mesurable, enjeu par enjeu.</p>
+            <p style="color:#64748b; font-size:0.85rem; margin-top:0.5rem;">Généré le 2026-08-22 05:16</p>
+        </header>
+
+        <section class="grid-3">
+            <div class="card">
+                <h2>Katas réussis</h2>
+                <div class="value">1</div>
+                <div class="label">sessions validées</div>
+            </div>
+            <div class="card">
+                <h2>Temps moyen</h2>
+                <div class="value">30s</div>
+                <div class="label">par kata</div>
+            </div>
+            <div class="card">
+                <h2>Journaux publiés</h2>
+                <div class="value">1</div>
+                <div class="label">réflexions</div>
+            </div>
+            <div class="card">
+                <h2>Score IA moyen</h2>
+                
+                <div class="value">
+                    55.0
+                </div>
+                <div class="label">sur 100</div>
+            </div>
+        </section>
+
+        <section class="grid-2">
+            <div class="chart-container">
+                <h2>🎯 Radar de compétences</h2>
+                <canvas id="radar"></canvas>
+            </div>
+            <div class="chart-container">
+                <h2>📈 Progression dans le temps</h2>
+                <canvas id="progress"></canvas>
+            </div>
+        </section>
+
+        <section class="grid-2">
+            <div class="card">
+                <h2>🏅 Badges</h2>
+                
+                    <div class="label" style="font-style:italic;">Aucun badge encore. Continue tes katas pour débloquer les premiers !</div>
+                
+            </div>
+            
+            <div class="card">
+                <h2>📝 Journal réflexif</h2>
+                <div class="label">Dernier journal publié : <a href="./journal/2026-08-22.md">2026-08-22.md</a></div>
+                <div class="label" style="margin-top:0.5rem;">Tous les journaux : <a href="./journal/">./journal/</a></div>
+            </div>
+            
+        </section>
+
+        <section class="grid-2">
+            <div class="card">
+                <h2>📜 Dernières sessions</h2>
+                <ul style="list-style:none; padding:0; margin-top:0.75rem;">
+                    
+                    <li style="padding:0.35rem 0; border-bottom:1px solid #334155; color:#cbd5e1;">
+                        kata-001 – ✅ –
+                        Score IA : 55 / 100
+                        <span style="color:#64748b; float:right; font-size:0.85rem;">2026-08-22 04:42:26.045856</span>
+                    </li>
+                    
+                </ul>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>Propulsé par K8s Dojo — <a href="https://github.com/">Voir le repo</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const labels = ['pods', 'services', 'storage', 'networking', 'rbac', 'git', 'architecture'];
+        const latest = {"architecture": 0, "date": "2026-08-22 04:42:58.449533", "git": 0, "networking": 0, "pods": 5, "rbac": 0, "services": 0, "storage": 0};
+        const snapshots = [{"architecture": 0, "date": "2026-08-22 04:42:58.449533", "git": 0, "networking": 0, "pods": 5, "rbac": 0, "services": 0, "storage": 0}];
+
+        new Chart(document.getElementById('radar'), {
+            type: 'radar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Compétences actuelles',
+                    data: labels.map(k => latest[k] || 0),
+                    backgroundColor: 'rgba(59, 130, 246, 0.25)',
+                    borderColor: '#3b82f6',
+                    pointBackgroundColor: '#3b82f6',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        min: 0, max: 100,
+                        ticks: { color: '#94a3b8', backdropColor: 'transparent' },
+                        pointLabels: { color: '#e2e8f0', font: { size: 12 } },
+                        grid: { color: 'rgba(148, 163, 184, 0.15)' },
+                        angleLines: { color: 'rgba(148, 163, 184, 0.15)' }
+                    }
+                },
+                plugins: { legend: { labels: { color: '#e2e8f0' } } }
+            }
+        });
+
+        new Chart(document.getElementById('progress'), {
+            type: 'line',
+            data: {
+                labels: snapshots.map(s => (s.date.split(/[T ]/)[0])),
+                datasets: labels.map((k, i) => ({
+                    label: k,
+                    data: snapshots.map(s => s[k] || 0),
+                    borderColor: [
+                        '#3b82f6', '#34d399', '#f59e0b', '#a78bfa',
+                        '#f472b6', '#22d3ee', '#818cf8'
+                    ][i % 7],
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    pointRadius: 3
+                }))
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.1)' } },
+                    y: { min: 0, max: 100, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.1)' } }
+                },
+                plugins: { legend: { labels: { color: '#e2e8f0' }, position: 'bottom' } }
+            }
+        });
+    </script>
+</body>
+</html>
