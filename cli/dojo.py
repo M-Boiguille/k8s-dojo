@@ -31,3 +31,7 @@ cli.add_command(test.test, name="test")
 
 def main():
     cli()
+
+
+if __name__ == "__main__":
+    main()
