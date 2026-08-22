@@ -1,5 +1,6 @@
 id: "kata-001"
 title: "Pods & Readiness"
+tool: "k8s"
 level: "beginner"
 category: "pods"
 mode: "creation"

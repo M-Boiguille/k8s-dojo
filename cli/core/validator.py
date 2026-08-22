@@ -2,7 +2,8 @@
 from cli.core.k8s_client import exec_check
 
 
-REQUIRED_FIELDS = {"id", "title", "level", "category", "mode"}
+REQUIRED_FIELDS = {"id", "title", "tool", "level", "category", "mode"}
+VALID_TOOLS = {"k8s", "terraform", "aws", "github-actions"}
 VALID_LEVELS = {"beginner", "intermediate", "advanced", "boss"}
 VALID_CATEGORIES = {"pods", "services", "storage", "networking", "rbac", "git", "architecture"}
 VALID_MODES = {"creation", "troubleshooting", "chaos", "git", "architecture"}
@@ -15,6 +16,8 @@ def validate_kata_schema(kata: dict) -> list[str]:
     missing = REQUIRED_FIELDS - set(kata.keys())
     if missing:
         errors.append(f"Missing required fields: {', '.join(sorted(missing))}")
+    if kata.get("tool") not in VALID_TOOLS:
+        errors.append(f"Invalid tool '{kata.get('tool')}'")
     if kata.get("level") not in VALID_LEVELS:
         errors.append(f"Invalid level '{kata.get('level')}'")
     if kata.get("category") not in VALID_CATEGORIES:

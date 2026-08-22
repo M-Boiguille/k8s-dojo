@@ -3,6 +3,7 @@
 
 id: "kata-001-pods"             # Obligatoire. Unique. Correspond au nom du dossier.
 title: "Déployer 3 replicas"    # Obligatoire.
+tool: "k8s"                     # k8s | terraform | aws | github-actions
 level: "beginner"               # beginner | intermediate | advanced | boss
 category: "pods"                # pods | services | storage | networking | rbac | git | architecture
 mode: "creation"                # creation | troubleshooting | chaos | git | architecture

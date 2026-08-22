@@ -75,7 +75,7 @@ def submit(no_ia):
 
     if success:
         db.bump_total_katas(conn)
-        db.add_competence_snapshot(conn, kata.get("category", "pods"))
+        db.add_skill_snapshot(conn, kata.get("tool", "k8s"), kata.get("category", "pods"))
         click.echo("🎉 Kata validé avec succès !")
         if ia_score is not None:
             click.echo(f"   Score IA : {ia_score}/100")

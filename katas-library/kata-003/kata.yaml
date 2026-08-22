@@ -1,5 +1,6 @@
 id: "kata-003"
 title: "PVC & Volumes"
+tool: "k8s"
 level: "intermediate"
 category: "storage"
 mode: "creation"

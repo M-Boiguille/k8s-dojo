@@ -1,4 +1,5 @@
 """SQLite database layer for K8s Dojo."""
+import json
 import os
 import sqlite3
 import uuid
@@ -72,9 +73,17 @@ def init_db(conn: sqlite3.Connection) -> None:
             git INTEGER DEFAULT 0,
             architecture INTEGER DEFAULT 0
         );
+
+        CREATE TABLE IF NOT EXISTS skill_snapshots (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date DATETIME DEFAULT CURRENT_TIMESTAMP,
+            tool TEXT NOT NULL,
+            scores TEXT NOT NULL
+        );
         """
     )
     conn.commit()
+    _migrate_competence_to_skills(conn)
 
 
 def create_profile(conn: sqlite3.Connection) -> str:
@@ -221,4 +230,52 @@ def get_all_competence_snapshots(conn: sqlite3.Connection) -> list[sqlite3.Row]:
 def get_sessions(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     return conn.execute(
         "SELECT * FROM sessions ORDER BY started_at ASC"
+    ).fetchall()
+
+
+K8S_SKILL_KEYS = ["pods", "services", "storage", "networking", "rbac", "git", "architecture"]
+
+
+def _migrate_competence_to_skills(conn: sqlite3.Connection) -> None:
+    """One-shot migration from the legacy competence_snapshots table."""
+    existing = conn.execute("SELECT COUNT(*) FROM skill_snapshots").fetchone()[0]
+    if existing > 0:
+        return
+    rows = conn.execute(
+        "SELECT * FROM competence_snapshots ORDER BY date ASC"
+    ).fetchall()
+    for row in rows:
+        scores = {k: row[k] for k in K8S_SKILL_KEYS}
+        conn.execute(
+            "INSERT INTO skill_snapshots (date, tool, scores) VALUES (?, ?, ?)",
+            (row["date"], "k8s", json.dumps(scores)),
+        )
+    conn.commit()
+
+
+def _default_k8s_scores() -> dict:
+    return {k: 0 for k in K8S_SKILL_KEYS}
+
+
+def add_skill_snapshot(conn: sqlite3.Connection, tool: str, category: str, delta: int = 5) -> None:
+    latest = conn.execute(
+        "SELECT * FROM skill_snapshots WHERE tool = ? ORDER BY date DESC LIMIT 1",
+        (tool,),
+    ).fetchone()
+    scores = _default_k8s_scores() if tool == "k8s" else {}
+    if latest:
+        scores = {**json.loads(latest["scores"])}
+    if category in scores:
+        scores[category] = min(100, scores[category] + delta)
+    conn.execute(
+        "INSERT INTO skill_snapshots (date, tool, scores) VALUES (?, ?, ?)",
+        (datetime.now(), tool, json.dumps(scores)),
+    )
+    conn.commit()
+
+
+def get_skill_snapshots(conn: sqlite3.Connection, tool: str = "k8s") -> list[sqlite3.Row]:
+    return conn.execute(
+        "SELECT * FROM skill_snapshots WHERE tool = ? ORDER BY date ASC",
+        (tool,),
     ).fetchall()

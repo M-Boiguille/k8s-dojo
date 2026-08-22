@@ -1,5 +1,6 @@
 id: "kata-002"
 title: "Service Discovery"
+tool: "k8s"
 level: "beginner"
 category: "services"
 mode: "troubleshooting"

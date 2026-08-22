@@ -15,33 +15,33 @@ from cli.core import db, kata_loader
 def build_dashboard(output):
     """Génère le dashboard statique (index.html)."""
     conn = db.get_db()
-    snapshots = db.get_all_competence_snapshots(conn)
+    skill_rows = db.get_skill_snapshots(conn, tool="k8s")
     sessions = db.get_sessions(conn)
     pub_dir = db.get_data_dir() / "public" / "journal"
     journals = sorted(pub_dir.glob("*.md"), key=lambda p: p.stat().st_mtime, reverse=True) if pub_dir.exists() else []
     latest_journal = journals[0].name if journals else None
 
-    latest = snapshots[-1] if snapshots else None
+    latest = skill_rows[-1] if skill_rows else None
 
     def row_to_dict(row):
         return {k: row[k] for k in row.keys()} if row else {}
 
-    snapshots_data = [row_to_dict(s) for s in snapshots]
     sessions_data = [row_to_dict(s) for s in sessions]
-    latest_data = row_to_dict(latest)
+    latest_data = {**json.loads(latest["scores"]), "date": latest["date"]} if latest else None
     if not latest_data:
         latest_data = {
             "pods": 0, "services": 0, "storage": 0, "networking": 0,
             "rbac": 0, "git": 0, "architecture": 0,
         }
+    snapshots_data = [{"date": r["date"], **json.loads(r["scores"])} for r in skill_rows]
     success_count = sum(1 for s in sessions if s["success"])
 
     # Badges
     badges = []
-    if latest:
-        if latest["storage"] >= 80:
+    if latest_data:
+        if latest_data["storage"] >= 80:
             badges.append("Storage Master")
-        if latest["pods"] >= 80 and latest["services"] >= 80:
+        if latest_data["pods"] >= 80 and latest_data["services"] >= 80:
             badges.append("Cluster Builder")
     boss_win = False
     for s in sessions:
@@ -54,7 +54,7 @@ def build_dashboard(output):
                 boss_win = True
     if boss_win:
         badges.append("Boss Slayer")
-    if latest and latest["git"] >= 50:
+    if latest_data and latest_data["git"] >= 50:
         badges.append("Git Apprentice")
 
     completed = [s for s in sessions if s["success"]]
