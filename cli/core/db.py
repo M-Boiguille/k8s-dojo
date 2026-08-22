@@ -6,17 +6,15 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
-DEFAULT_HOME = Path.home() / ".k8s-dojo"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_HOME = PROJECT_ROOT
 
 
 def get_data_dir() -> Path:
-    """Resolve data directory (local or home)."""
+    """Resolve data directory (project root, or K8S_DOJO_HOME override)."""
     if os.getenv("K8S_DOJO_HOME"):
-        return Path(os.getenv("K8S_DOJO_HOME"))
-    local_db = Path.cwd() / "private" / "dojo.db"
-    if local_db.exists():
-        return Path.cwd()
-    return DEFAULT_HOME
+        return Path(os.getenv("K8S_DOJO_HOME")).expanduser().resolve()
+    return PROJECT_ROOT
 
 
 def db_path() -> Path:

@@ -5,15 +5,14 @@ from pathlib import Path
 import yaml
 
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+
 def get_katas_library() -> Path:
     """Resolve the katas-library folder."""
     if os.getenv("KATAS_LIBRARY"):
         return Path(os.getenv("KATAS_LIBRARY"))
-    cwd = Path.cwd() / "katas-library"
-    if cwd.exists():
-        return cwd
-    package_root = Path(__file__).resolve().parents[2]
-    return package_root / "katas-library"
+    return PROJECT_ROOT / "katas-library"
 
 
 def list_katas() -> list[str]:

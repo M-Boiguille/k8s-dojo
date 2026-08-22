@@ -7,7 +7,8 @@ from pathlib import Path
 import openai
 from dotenv import load_dotenv
 
-load_dotenv()
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(dotenv_path=PROJECT_ROOT / ".env")
 
 BASE_URL = "https://api.deepseek.com"
 MODEL = "deepseek-chat"
