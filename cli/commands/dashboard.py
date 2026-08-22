@@ -1,5 +1,6 @@
 """`dojo build-dashboard` command."""
 import json
+import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -17,7 +18,8 @@ def build_dashboard(output):
     snapshots = db.get_all_competence_snapshots(conn)
     sessions = db.get_sessions(conn)
     pub_dir = db.get_data_dir() / "public" / "journal"
-    journals = list(pub_dir.glob("*.md")) if pub_dir.exists() else []
+    journals = sorted(pub_dir.glob("*.md"), key=lambda p: p.stat().st_mtime, reverse=True) if pub_dir.exists() else []
+    latest_journal = journals[0].name if journals else None
 
     latest = snapshots[-1] if snapshots else None
 
@@ -66,6 +68,11 @@ def build_dashboard(output):
 
     out = Path(output)
     out.mkdir(parents=True, exist_ok=True)
+    (out / "assets").mkdir(parents=True, exist_ok=True)
+    style_src = template_dir / "style.css"
+    if style_src.exists():
+        shutil.copy2(style_src, out / "assets" / "style.css")
+
     (out / "index.html").write_text(
         template.render(
             generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
@@ -76,6 +83,7 @@ def build_dashboard(output):
             badges=badges,
             average_time=avg,
             journal_count=len(journals),
+            latest_journal=latest_journal,
         ),
         encoding="utf-8",
     )

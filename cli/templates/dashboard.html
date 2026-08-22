@@ -3,66 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>K8s Dojo – Dashboard</title>
+    <title>K8s Dojo – Portfolio DevOps</title>
+    <link rel="stylesheet" href="./assets/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: system-ui, sans-serif; margin: 2rem; background: #0f172a; color: #e2e8f0; }
-        h1 { color: #38bdf8; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
-        .card { background: #1e293b; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .metric { font-size: 2rem; font-weight: bold; color: #34d399; }
-        .badge { display: inline-block; background: #2563eb; color: white; padding: 0.25rem 0.75rem; border-radius: 999px; margin: 0.25rem; font-size: 0.9rem; }
-        a { color: #38bdf8; }
-        footer { margin-top: 2rem; color: #94a3b8; font-size: 0.8rem; }
-    </style>
 </head>
 <body>
-    <h1>🥋 K8s Dojo – Portfolio</h1>
-    <p>Généré le {{ generated_at }}</p>
+    <header class="hero">
+        <h1>🥋 K8s Dojo</h1>
+        <p>Moteur d'apprentissage adaptatif Kubernetes & DevOps. Voici ma progression mesurable en ops, enjeu par enjeu.</p>
+        <p style="margin-top:1rem;color:#64748b;font-size:0.9rem;">Généré le {{ generated_at }}</p>
+    </header>
 
-    <div class="grid">
-        <div class="card">
+    <main class="container">
+        <section>
+            <h2>📊 Vue d'ensemble</h2>
+            <div class="grid">
+                <div class="card">
+                    <p class="metric-label">Katas réussis</p>
+                    <p class="metric">{{ success_count }}</p>
+                </div>
+                <div class="card">
+                    <p class="metric-label">Temps moyen</p>
+                    <p class="metric">{{ average_time }}s</p>
+                </div>
+                <div class="card">
+                    <p class="metric-label">Journaux publiés</p>
+                    <p class="metric">{{ journal_count }}</p>
+                </div>
+                <div class="card">
+                    <p class="metric-label">Score IA moyen</p>
+                    {% set avg_score = sessions | selectattr('ia_score') | map(attribute='ia_score') | list %}
+                    <p class="metric">
+                        {% if avg_score %}
+                            {{ (avg_score | sum / avg_score | length) | round }} / 100
+                        {% else %}
+                            —
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section>
             <h2>🎯 Radar de compétences</h2>
-            <canvas id="radar"></canvas>
-        </div>
-        <div class="card">
+            <div class="card">
+                <div class="chart-container">
+                    <canvas id="radar"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section>
             <h2>📈 Progression dans le temps</h2>
-            <canvas id="progress"></canvas>
-        </div>
-        <div class="card">
+            <div class="card">
+                <div class="chart-container">
+                    <canvas id="progress"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section>
             <h2>🏅 Badges</h2>
-            {% if badges %}
-                {% for badge in badges %}<span class="badge">{{ badge }}</span>{% endfor %}
-            {% else %}
-                <p>Aucun badge encore. Continue tes katas !</p>
-            {% endif %}
-        </div>
-        <div class="card">
-            <h2>📊 Métriques</h2>
-            <p>Katas réussis : <span class="metric">{{ success_count }}</span></p>
-            <p>Temps moyen : <span class="metric">{{ average_time }}s</span></p>
-            <p>Journaux publiés : <span class="metric">{{ journal_count }}</span></p>
-        </div>
-    </div>
+            <div class="card">
+                {% if badges %}
+                    {% for badge in badges %}<span class="badge">{{ badge }}</span>{% endfor %}
+                {% else %}
+                    <p class="badge-empty">Aucun badge encore. Continue tes katas pour débloquer les premiers !</p>
+                {% endif %}
+            </div>
+        </section>
 
-    {% if sessions %}
-    <div class="card" style="margin-top: 1.5rem;">
-        <h2>📜 Dernières sessions</h2>
-        <ul>
-            {% for s in sessions[-10:] | reverse %}
-            <li>{{ s.kata_id }} – {{ '✅' if s.success else '❌' }} – {{ s.ia_score or '–' }}/100</li>
-            {% endfor %}
-        </ul>
-    </div>
-    {% endif %}
+        <section>
+            <h2>📜 Dernières sessions</h2>
+            <div class="card">
+                {% if sessions %}
+                <ul class="clean">
+                    {% for s in sessions[-10:] | reverse %}
+                    <li>
+                        {{ s.kata_id }} – {{ '✅' if s.success else '❌' }}
+                        – Score IA : {{ s.ia_score if s.ia_score is not none else '—' }} / 100
+                        <span style="color:#64748b;float:right;">{{ s.started_at }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="badge-empty">Aucune session enregistrée pour le moment.</p>
+                {% endif %}
+            </div>
+        </section>
 
-    <footer>
-        <p>Propulsé par K8s Dojo – <a href="./journal/">Voir les journaux</a></p>
+        {% if latest_journal %}
+        <section>
+            <h2>📝 Journal réflexif</h2>
+            <div class="card">
+                <p>Dernier journal publié : <a href="./journal/{{ latest_journal }}">{{ latest_journal }}</a></p>
+                <p style="margin-top:0.5rem; color:#64748b;">Tous les journaux sont dans <a href="./journal/">./journal/</a>.</p>
+            </div>
+        </section>
+        {% endif %}
+    </main>
+
+    <footer class="footer">
+        <p>Propulsé par K8s Dojo – <a href="https://github.com/">Voir le repo</a></p>
     </footer>
 
     <script>
         const labels = ['pods', 'services', 'storage', 'networking', 'rbac', 'git', 'architecture'];
         const latest = {{ latest | tojson }};
+        const snapshots = {{ snapshots | tojson }};
 
         new Chart(document.getElementById('radar'), {
             type: 'radar',
@@ -70,33 +118,68 @@
                 labels: labels,
                 datasets: [{
                     label: 'Compétences actuelles',
-                    data: labels.map(k => latest[k]),
-                    backgroundColor: 'rgba(56, 189, 248, 0.2)',
+                    data: labels.map(k => latest[k] || 0),
+                    backgroundColor: 'rgba(56, 189, 248, 0.25)',
                     borderColor: 'rgba(56, 189, 248, 1)',
+                    pointBackgroundColor: 'rgba(56, 189, 248, 1)',
                     borderWidth: 2
                 }]
             },
             options: {
-                scales: { r: { min: 0, max: 100, beginAtZero: true } }
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        min: 0,
+                        max: 100,
+                        ticks: { color: '#94a3b8', backdropColor: 'transparent' },
+                        pointLabels: { color: '#e2e8f0', font: { size: 12 } },
+                        grid: { color: 'rgba(148, 163, 184, 0.15)' },
+                        angleLines: { color: 'rgba(148, 163, 184, 0.15)' }
+                    }
+                },
+                plugins: { legend: { labels: { color: '#e2e8f0' } } }
             }
         });
-
-        const snapshots = {{ snapshots | tojson }};
 
         new Chart(document.getElementById('progress'), {
             type: 'line',
             data: {
-                labels: snapshots.map(s => s.date.split('T')[0]),
+                labels: snapshots.map(s => (s.date.split(/[T ]/)[0])),
                 datasets: labels.map((k, i) => ({
                     label: k,
-                    data: snapshots.map(s => s[k]),
+                    data: snapshots.map(s => s[k] || 0),
+                    borderColor: [
+                        '#38bdf8', '#34d399', '#f59e0b', '#a78bfa',
+                        '#f472b6', '#22d3ee', '#818cf8'
+                    ][i % 7],
+                    backgroundColor: 'transparent',
                     borderWidth: 2,
-                    tension: 0.3
+                    tension: 0.3,
+                    pointRadius: 3
                 }))
             },
             options: {
-                scales: { y: { min: 0, max: 100 } },
-                plugins: { legend: { position: 'bottom' } }
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                    },
+                    y: {
+                        min: 0,
+                        max: 100,
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: { color: '#e2e8f0' },
+                        position: 'bottom'
+                    }
+                }
             }
         });
     </script>
