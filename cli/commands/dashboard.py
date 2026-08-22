@@ -1,0 +1,82 @@
+"""`dojo build-dashboard` command."""
+import json
+from datetime import datetime
+from pathlib import Path
+
+import click
+import jinja2
+
+from cli.core import db, kata_loader
+
+
+@click.command("build-dashboard")
+@click.option("--output", default="public", type=click.Path(), help="Dossier de sortie.")
+def build_dashboard(output):
+    """Génère le dashboard statique (index.html)."""
+    conn = db.get_db()
+    snapshots = db.get_all_competence_snapshots(conn)
+    sessions = db.get_sessions(conn)
+    pub_dir = db.get_data_dir() / "public" / "journal"
+    journals = list(pub_dir.glob("*.md")) if pub_dir.exists() else []
+
+    latest = snapshots[-1] if snapshots else None
+
+    def row_to_dict(row):
+        return {k: row[k] for k in row.keys()} if row else {}
+
+    snapshots_data = [row_to_dict(s) for s in snapshots]
+    sessions_data = [row_to_dict(s) for s in sessions]
+    latest_data = row_to_dict(latest)
+    if not latest_data:
+        latest_data = {
+            "pods": 0, "services": 0, "storage": 0, "networking": 0,
+            "rbac": 0, "git": 0, "architecture": 0,
+        }
+    success_count = sum(1 for s in sessions if s["success"])
+
+    # Badges
+    badges = []
+    if latest:
+        if latest["storage"] >= 80:
+            badges.append("Storage Master")
+        if latest["pods"] >= 80 and latest["services"] >= 80:
+            badges.append("Cluster Builder")
+    boss_win = False
+    for s in sessions:
+        if s["success"] and s["ia_score"] is not None and s["ia_score"] >= 90:
+            try:
+                kata = kata_loader.load_kata(s["kata_id"])
+            except FileNotFoundError:
+                kata = {}
+            if kata.get("level") == "boss":
+                boss_win = True
+    if boss_win:
+        badges.append("Boss Slayer")
+    if latest and latest["git"] >= 50:
+        badges.append("Git Apprentice")
+
+    completed = [s for s in sessions if s["success"]]
+    avg = 0
+    if completed:
+        avg = round(sum(s["duration_seconds"] or 0 for s in completed) / len(completed))
+
+    template_dir = Path(__file__).resolve().parents[1] / "templates"
+    env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir))
+    template = env.get_template("dashboard.html")
+
+    out = Path(output)
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "index.html").write_text(
+        template.render(
+            generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
+            latest=latest_data,
+            snapshots=snapshots_data,
+            sessions=sessions_data,
+            success_count=success_count,
+            badges=badges,
+            average_time=avg,
+            journal_count=len(journals),
+        ),
+        encoding="utf-8",
+    )
+    click.echo(f"📊 Dashboard généré : {out / 'index.html'}")

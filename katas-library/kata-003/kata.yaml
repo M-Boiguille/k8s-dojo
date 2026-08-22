@@ -1,0 +1,34 @@
+id: "kata-003"
+title: "PVC & Volumes"
+level: "intermediate"
+category: "storage"
+mode: "creation"
+estimated_time: "15m"
+
+initial_state:
+  description: "Un Pod référence un PVC qui n'existe pas encore."
+
+validation:
+  checks:
+    - description: "Le PVC my-pvc doit être Bound."
+      command: "kubectl get pvc my-pvc -o jsonpath='{.status.phase}'"
+      expected: "Bound"
+      comparator: "eq"
+
+    - description: "Le Pod doit monter le PVC."
+      command: "kubectl get pod app-001 -o jsonpath='{.spec.volumes[0].persistentVolumeClaim.claimName}'"
+      expected: "my-pvc"
+      comparator: "eq"
+
+solution:
+  description: "Créer un PVC my-pvc et l'attacher au Pod via `volumes.persistentVolumeClaim`."
+
+hints:
+  - level: 1
+    question: "Quel est le statut du Pod avec `kubectl get pods` ? Est-il Pending à cause d'un événement ?"
+  - level: 2
+    question: "Quelle ressource Kubernetes demande un volume persistant ? `kubectl get pvc` te donne la réponse."
+  - level: 3
+    question: "Comment monte-t-on un volume dans un conteneur ? Cherche `volumeMounts` et `volumes` dans le manifest."
+  - level: 4
+    explanation: "Le Pod attend un PVC nommé my-pvc. Crée un PVC et référence-le dans `spec.volumes[].persistentVolumeClaim`."

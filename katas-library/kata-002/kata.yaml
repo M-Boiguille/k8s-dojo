@@ -1,0 +1,39 @@
+id: "kata-002"
+title: "Service Discovery"
+level: "beginner"
+category: "services"
+mode: "troubleshooting"
+estimated_time: "10m"
+
+initial_state:
+  description: "Un Service expose un Deployment mais les labels ne matchent pas."
+
+validation:
+  checks:
+    - description: "Le Service doit être de type ClusterIP."
+      command: "kubectl get svc my-svc -o jsonpath='{.spec.type}'"
+      expected: "ClusterIP"
+      comparator: "eq"
+
+    - description: "Le Deployment doit avoir 2 replicas prêts."
+      command: "kubectl get deployment my-app -o jsonpath='{.status.readyReplicas}'"
+      expected: "2"
+      comparator: "eq"
+
+    - description: "Le Service doit pointer vers le bon label."
+      command: "kubectl get svc my-svc -o jsonpath='{.spec.selector.app}'"
+      expected: "my-app"
+      comparator: "eq"
+
+solution:
+  description: "Corriger le selector du Service pour matcher les labels du Deployment."
+
+hints:
+  - level: 1
+    question: "Que renvoie `kubectl get endpoints my-svc` ? Y a-t-il des adresses IP listées ?"
+  - level: 2
+    question: "Comment un Service sélectionne-t-il les Pods ? Compare `spec.selector` et `metadata.labels` du Pod."
+  - level: 3
+    question: "Quelle commande montre les labels d'un Pod ? `kubectl get pods --show-labels` te donne les clés."
+  - level: 4
+    explanation: "Le selector du Service doit correspondre exactement aux labels du Pod. Corrige le champ `selector` du Service."

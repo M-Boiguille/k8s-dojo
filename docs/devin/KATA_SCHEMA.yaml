@@ -1,0 +1,64 @@
+# Schema for a single Kata (version 1.0)
+# Devin doit implémenter un validate_katas.py qui vérifie la conformité de chaque kata.yaml à ce schéma.
+
+id: "kata-001-pods"             # Obligatoire. Unique. Correspond au nom du dossier.
+title: "Déployer 3 replicas"    # Obligatoire.
+level: "beginner"               # beginner | intermediate | advanced | boss
+category: "pods"                # pods | services | storage | networking | rbac | git | architecture
+mode: "creation"                # creation | troubleshooting | chaos | git | architecture
+estimated_time: "10m"           # Optionnel (pour statistiques).
+
+# --- État Initial ---
+# Les fichiers manifests doivent être placés dans ./initial/
+# Si un script est nécessaire (ex: `kubectl apply -f ./initial/`), il doit être décrit ici.
+initial_state:
+  description: "Le dossier initial contient un Deployment sans readinessProbe."
+  pre_script: "kubectl apply -f ./initial/"
+
+# --- Validation (conditions de succès) ---
+# Devin doit exécuter ces commandes dans l'ordre. Si une échoue, le kata est FAIL.
+validation:
+  checks:
+    - description: "Le Deployment doit avoir 3 replicas prêts."
+      command: "kubectl get deployment my-app -o jsonpath='{.status.readyReplicas}'"
+      expected: "3"
+      comparator: "eq"           # eq | ne | contains | regex
+
+    - description: "Un Service ClusterIP doit exister."
+      command: "kubectl get svc my-app-svc -o jsonpath='{.spec.type}'"
+      expected: "ClusterIP"
+      comparator: "eq"
+
+    - description: "La readinessProbe doit être configurée."
+      command: "kubectl get deployment my-app -o jsonpath='{.spec.template.spec.containers[0].readinessProbe}'"
+      expected: "null"
+      comparator: "ne"           # Ne doit PAS être null
+
+# --- Solution (pour la réinitialisation) ---
+# Devin n'utilise pas ce champ pour la validation. Il sert juste à la documentation
+# et à un éventuel `dojo reset` (optionnel).
+solution:
+  description: "Ajouter readinessProbe: httpGet /health dans le Deployment."
+  fix_manifest: "./solution/deployment-fixed.yaml"
+
+# --- Indices Socratiques (4 niveaux) ---
+# Ces prompts sont envoyés à l'IA (system_tutor) avec le niveau correspondant.
+# Devin doit juste transmettre le contenu de `question` en fonction du niveau demandé.
+hints:
+  - level: 1
+    question: "Observe l'état des Pods. Que dit `kubectl get pods` ? Les Pods sont-ils 'Running' ou 'Pending' ?"
+
+  - level: 2
+    question: "Un Pod peut être 'Running' mais ne pas recevoir de trafic. Que vérifie la 'readinessProbe' ? Est-elle définie dans ton Deployment ?"
+
+  - level: 3
+    question: "La commande `kubectl describe deployment` te donne la configuration actuelle. Compare-la avec la documentation officielle sur les 'readinessProbe'."
+
+  - level: 4
+    explanation: "La probe est absente. Un Service ne routera jamais vers un Pod non ready. Ajoute `readinessProbe: httpGet: path: /health port: 8080`."
+
+# --- Chaos (optionnel, uniquement si mode=chaos) ---
+# Si ce champ est présent, le kata nécessite Chaos Mesh.
+chaos:
+  template: "pod-kill.yaml"      # Fichier dans le dossier du kata
+  duration: "30s"

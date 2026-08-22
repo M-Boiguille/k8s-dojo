@@ -1,0 +1,80 @@
+name: Dojo CI - PR Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+    paths:
+      - 'katas-library/**'
+      - 'cli/**'
+      - 'scripts/**'
+
+jobs:
+  validate-katas:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Dojo CLI
+        run: |
+          pip install --upgrade pip
+          pip install -e .
+      - name: Validate Katas (Schema + Dry-run)
+        run: |
+          dojo test --all --dry-run
+
+  security-scan:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install kubeconform & trivy
+        run: |
+          wget https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz
+          tar xf kubeconform-linux-amd64.tar.gz
+          sudo mv kubeconform /usr/local/bin/
+          sudo apt-get install -y curl
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+      - name: Kubeconform Validation
+        run: |
+          find katas-library -name '*.yaml' -not -path '*/solution/*' -exec kubeconform -summary {} \;
+      - name: Trivy IaC Scan
+        run: |
+          trivy config --severity HIGH,CRITICAL --exit-code 0 katas-library/
+      - name: Post Security Report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            // Simple placeholder - Devin devra capturer les sorties dans des fichiers pour les coller ici
+            const report = "✅ Security scan completed. See logs above for details.";
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### 🛡️ Security Scan Report\n\n${report}`
+            });
+
+  ai-lead-review:
+    runs-on: ubuntu-latest
+    needs: [validate-katas, security-scan]
+    if: github.event.pull_request.draft == false && github.event.pull_request.ready_for_review == true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -e .
+      - name: Collect YAML files and run IA review
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          python scripts/ai_pr_review.py  # Ce script sera codé par Devin (utilise system_leaddev.txt)

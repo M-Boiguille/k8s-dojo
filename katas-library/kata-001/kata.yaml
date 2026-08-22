@@ -1,0 +1,39 @@
+id: "kata-001"
+title: "Pods & Readiness"
+level: "beginner"
+category: "pods"
+mode: "creation"
+estimated_time: "10m"
+
+initial_state:
+  description: "Le dossier initial contient un Deployment sans readinessProbe."
+
+validation:
+  checks:
+    - description: "Le Deployment doit avoir 3 replicas prêts."
+      command: "kubectl get deployment my-app -o jsonpath='{.status.readyReplicas}'"
+      expected: "3"
+      comparator: "eq"
+
+    - description: "Un Service ClusterIP doit exister."
+      command: "kubectl get svc my-app-svc -o jsonpath='{.spec.type}'"
+      expected: "ClusterIP"
+      comparator: "eq"
+
+    - description: "La readinessProbe doit être configurée."
+      command: "kubectl get deployment my-app -o jsonpath='{.spec.template.spec.containers[0].readinessProbe}'"
+      expected: "null"
+      comparator: "ne"
+
+solution:
+  description: "Ajouter readinessProbe: httpGet /health dans le Deployment."
+
+hints:
+  - level: 1
+    question: "Observe l'état des Pods. Que dit `kubectl get pods` ? Les Pods sont-ils 'Running' ou 'Pending' ?"
+  - level: 2
+    question: "Un Pod peut être 'Running' mais ne pas recevoir de trafic. Que vérifie la 'readinessProbe' ? Est-elle définie dans ton Deployment ?"
+  - level: 3
+    question: "La commande `kubectl describe deployment` te donne la configuration actuelle. Compare-la avec la documentation officielle sur les 'readinessProbe'."
+  - level: 4
+    explanation: "La probe est absente. Un Service ne routera jamais vers un Pod non ready. Ajoute `readinessProbe: httpGet: path: /health port: 8080`."

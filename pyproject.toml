@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "k8s-dojo"
+version = "0.1.0"
+description = "Moteur d'apprentissage adaptatif Kubernetes/DevOps"
+requires-python = ">=3.11"
+authors = [{ name = "K8s Dojo Team" }]
+dependencies = [
+    "click>=8.0",
+    "openai>=1.0",
+    "jinja2>=3.0",
+    "python-dotenv>=1.0",
+    "pyyaml>=6.0",
+    "requests>=2.0",
+    "pytest>=7.0",
+]
+
+[project.scripts]
+dojo = "cli.dojo:main"
+
+[tool.setuptools]
+packages = ["cli", "cli.core", "cli.commands"]
