@@ -1,0 +1,34 @@
+id: kata-008
+title: Headless Service
+tool: k8s
+level: intermediate
+category: services
+mode: troubleshooting
+estimated_time: 10m
+initial_state:
+  description: Le Service pour la base de données a une IP ClusterIP, il devrait être
+    headless.
+  pre_script: kubectl apply -f ./initial/
+validation:
+  checks:
+  - description: Le Service doit être de type ClusterIP.
+    command: kubectl get svc db -o jsonpath='{.spec.type}'
+    expected: ClusterIP
+    comparator: eq
+  - description: 'Le Service doit être headless (clusterIP: None).'
+    command: kubectl get svc db -o jsonpath='{.spec.clusterIP}'
+    expected: None
+    comparator: eq
+solution:
+  description: 'Mettre clusterIP: None.'
+hints:
+- level: 1
+  question: Quelle est la valeur de `clusterIP` actuellement pour `kubectl get svc
+    db` ?
+- level: 2
+  question: Pourquoi un service de base de données a souvent besoin d'un DNS par Pod
+    plutôt qu'une IP virtuelle ?
+- level: 3
+  question: Quelle valeur spéciale rend un Service 'headless' ?
+- level: 4
+  explanation: 'Ajoute `clusterIP: None` sous `spec` du Service.'

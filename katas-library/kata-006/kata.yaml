@@ -1,0 +1,36 @@
+id: kata-006
+title: RBAC RoleBinding
+tool: k8s
+level: intermediate
+category: rbac
+mode: creation
+estimated_time: 15m
+initial_state:
+  description: Un ServiceAccount doit pouvoir lire les Pods, mais le RoleBinding a
+    le mauvais sujet.
+  pre_script: kubectl apply -f ./initial/
+validation:
+  checks:
+  - description: Le Role doit autoriser l'accès aux Pods.
+    command: kubectl get role pod-reader -o jsonpath='{.rules[0].resources[0]}'
+    expected: pods
+    comparator: eq
+  - description: Le RoleBinding doit cibler le ServiceAccount dojo-user.
+    command: kubectl get rolebinding read-pods -o jsonpath='{.subjects[0].name}'
+    expected: dojo-user
+    comparator: eq
+solution:
+  description: Cibler le ServiceAccount dojo-user dans le RoleBinding.
+hints:
+- level: 1
+  question: Qui est lié au Role `pod-reader` ? Regarde `kubectl get rolebinding read-pods
+    -o yaml`.
+- level: 2
+  question: Un ServiceAccount est-il de kind `User` ou `ServiceAccount` dans le RoleBinding
+    ?
+- level: 3
+  question: Quelle est la commande pour vérifier les permissions d'un ServiceAccount
+    ? `kubectl auth can-i list pods --as=system:serviceaccount:default:dojo-user`
+- level: 4
+  explanation: Change `subjects[0].kind` en `ServiceAccount` et `subjects[0].name`
+    en `dojo-user`.

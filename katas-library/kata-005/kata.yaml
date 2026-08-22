@@ -1,0 +1,31 @@
+id: kata-005
+title: Ingress Host
+tool: k8s
+level: intermediate
+category: networking
+mode: troubleshooting
+estimated_time: 15m
+initial_state:
+  description: L'Ingress existe mais pointe vers le mauvais host.
+  pre_script: kubectl apply -f ./initial/
+validation:
+  checks:
+  - description: L'Ingress doit avoir le bon host.
+    command: kubectl get ingress my-ingress -o jsonpath='{.spec.rules[0].host}'
+    expected: dojo.example.com
+    comparator: eq
+solution:
+  description: Corriger spec.rules[0].host en 'dojo.example.com'.
+hints:
+- level: 1
+  question: Quelle valeur indique `kubectl get ingress my-ingress -o yaml` pour le
+    champ `host` ?
+- level: 2
+  question: Dans un Ingress, `rules[0].host` est-il bien `dojo.example.com` ou autre
+    chose ?
+- level: 3
+  question: Quelle commande modifie un manifeste en place ? N'oublie pas `kubectl
+    apply -f` après.
+- level: 4
+  explanation: Remplace `wrong.example.com` par `dojo.example.com` dans `spec.rules[0].host`
+    du manifest Ingress.

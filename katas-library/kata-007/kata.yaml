@@ -1,0 +1,34 @@
+id: kata-007
+title: ConfigMap & Variables
+tool: k8s
+level: intermediate
+category: architecture
+mode: creation
+estimated_time: 15m
+initial_state:
+  description: Le Deployment a une variable d'environnement en dur. Externalise-la
+    dans une ConfigMap.
+  pre_script: kubectl apply -f ./initial/
+validation:
+  checks:
+  - description: La ConfigMap doit exister.
+    command: kubectl get configmap greetings -o jsonpath='{.data.GREETING}'
+    expected: Bonjour
+    comparator: eq
+  - description: Le Pod doit charger la ConfigMap via envFrom.
+    command: kubectl get deployment app -o jsonpath='{.spec.template.spec.containers[0].envFrom[0].configMapRef.name}'
+    expected: greetings
+    comparator: eq
+solution:
+  description: Utiliser envFrom.configMapRef dans le Deployment.
+hints:
+- level: 1
+  question: Quelle ressource K8s permet d'externaliser des variables d'environnement
+    ?
+- level: 2
+  question: 'Comment monte-t-on une ConfigMap dans un conteneur : `env`, `envFrom`
+    ou `volumeMounts` ?'
+- level: 3
+  question: Cherche la différence entre `env.value` et `envFrom.configMapRef`.
+- level: 4
+  explanation: 'Remplace le bloc `env` par `envFrom: - configMapRef: name: greetings`.'

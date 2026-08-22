@@ -1,0 +1,35 @@
+id: kata-004
+title: Network Policy
+tool: k8s
+level: intermediate
+category: networking
+mode: creation
+estimated_time: 15m
+initial_state:
+  description: Un Pod nginx tourne sans règle réseau. Le NetworkPolicy a un sélecteur
+    vide.
+  pre_script: kubectl apply -f ./initial/
+validation:
+  checks:
+  - description: Le Pod nginx doit exister.
+    command: kubectl get pod nginx -o jsonpath='{.status.phase}'
+    expected: Running
+    comparator: eq
+  - description: Le NetworkPolicy doit cibler le label app=nginx.
+    command: kubectl get networkpolicy allow-nginx -o jsonpath='{.spec.podSelector.matchLabels.app}'
+    expected: nginx
+    comparator: eq
+solution:
+  description: 'Cibler le Pod nginx avec spec.podSelector.matchLabels.app: nginx.'
+hints:
+- level: 1
+  question: Quels Pods sont affectés par un NetworkPolicy ? Vérifie le champ `spec.podSelector`.
+- level: 2
+  question: 'Un `podSelector: {}` sélectionne tout le monde. Comment cibler uniquement
+    les Pods avec `app: nginx` ?'
+- level: 3
+  question: Compare `metadata.labels` du Pod avec `spec.podSelector.matchLabels` du
+    NetworkPolicy. Doivent-ils correspondre ?
+- level: 4
+  explanation: 'Ajoute `spec.podSelector.matchLabels.app: nginx` pour que la policy
+    ne s''applique qu''au Pod nginx.'

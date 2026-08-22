@@ -1,0 +1,29 @@
+id: kata-010
+title: Pod Disruption Budget
+tool: k8s
+level: advanced
+category: pods
+mode: creation
+estimated_time: 15m
+initial_state:
+  description: Un Pod Disruption Budget est créé mais il ne cible aucun Pod.
+  pre_script: kubectl apply -f ./initial/
+validation:
+  checks:
+  - description: Le PDB doit cibler les Pods app=my-app.
+    command: kubectl get pdb my-app -o jsonpath='{.spec.selector.matchLabels.app}'
+    expected: my-app
+    comparator: eq
+solution:
+  description: 'Ajouter un selector matchLabels.app: my-app.'
+hints:
+- level: 1
+  question: Quels Pods un PodDisruptionBudget protège-t-il ? Regarde `spec.selector`.
+- level: 2
+  question: Si `spec.selector` est vide, le PDB ne cible personne. Comment le lier
+    aux Pods du Deployment ?
+- level: 3
+  question: 'Les labels du Deployment sont `app: my-app`. Comment les référencer dans
+    le PDB ?'
+- level: 4
+  explanation: 'Ajoute `selector: matchLabels: app: my-app` au manifest du PDB.'

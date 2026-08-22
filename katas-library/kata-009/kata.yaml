@@ -1,0 +1,28 @@
+id: kata-009
+title: Horizontal Pod Autoscaler
+tool: k8s
+level: advanced
+category: pods
+mode: creation
+estimated_time: 20m
+initial_state:
+  description: Un HPA existe avec un nombre minimum de replicas mais pas de maximum.
+  pre_script: kubectl apply -f ./initial/
+validation:
+  checks:
+  - description: Le HPA doit avoir 5 replicas maximum.
+    command: kubectl get hpa my-app -o jsonpath='{.spec.maxReplicas}'
+    expected: '5'
+    comparator: eq
+solution:
+  description: Configurer spec.maxReplicas a 5.
+hints:
+- level: 1
+  question: Que renvoie `kubectl get hpa my-app` ? Quel est `MAXPODS` ?
+- level: 2
+  question: Pourquoi un HPA a besoin à la fois de `minReplicas` et de `maxReplicas`
+    ?
+- level: 3
+  question: Quelle commande te montre le manifeste complet du HPA ?
+- level: 4
+  explanation: 'Ajoute `maxReplicas: 5` au même niveau que `minReplicas` dans le HPA.'
