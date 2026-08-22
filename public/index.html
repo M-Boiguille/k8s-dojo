@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K8s Dojo – Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 2rem; background: #0f172a; color: #e2e8f0; }
+        h1 { color: #38bdf8; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .card { background: #1e293b; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .metric { font-size: 2rem; font-weight: bold; color: #34d399; }
+        .badge { display: inline-block; background: #2563eb; color: white; padding: 0.25rem 0.75rem; border-radius: 999px; margin: 0.25rem; font-size: 0.9rem; }
+        a { color: #38bdf8; }
+        footer { margin-top: 2rem; color: #94a3b8; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <h1>🥋 K8s Dojo – Portfolio</h1>
+    <p>Généré le 2026-08-22 04:43</p>
+
+    <div class="grid">
+        <div class="card">
+            <h2>🎯 Radar de compétences</h2>
+            <canvas id="radar"></canvas>
+        </div>
+        <div class="card">
+            <h2>📈 Progression dans le temps</h2>
+            <canvas id="progress"></canvas>
+        </div>
+        <div class="card">
+            <h2>🏅 Badges</h2>
+            
+                <p>Aucun badge encore. Continue tes katas !</p>
+            
+        </div>
+        <div class="card">
+            <h2>📊 Métriques</h2>
+            <p>Katas réussis : <span class="metric">1</span></p>
+            <p>Temps moyen : <span class="metric">30s</span></p>
+            <p>Journaux publiés : <span class="metric">1</span></p>
+        </div>
+    </div>
+
+    
+    <div class="card" style="margin-top: 1.5rem;">
+        <h2>📜 Dernières sessions</h2>
+        <ul>
+            
+            <li>kata-001 – ✅ – 55/100</li>
+            
+        </ul>
+    </div>
+    
+
+    <footer>
+        <p>Propulsé par K8s Dojo – <a href="./journal/">Voir les journaux</a></p>
+    </footer>
+
+    <script>
+        const labels = ['pods', 'services', 'storage', 'networking', 'rbac', 'git', 'architecture'];
+        const latest = {"architecture": 0, "date": "2026-08-22 04:42:58.449533", "git": 0, "id": 1, "networking": 0, "pods": 5, "rbac": 0, "services": 0, "storage": 0};
+
+        new Chart(document.getElementById('radar'), {
+            type: 'radar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Compétences actuelles',
+                    data: labels.map(k => latest[k]),
+                    backgroundColor: 'rgba(56, 189, 248, 0.2)',
+                    borderColor: 'rgba(56, 189, 248, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                scales: { r: { min: 0, max: 100, beginAtZero: true } }
+            }
+        });
+
+        const snapshots = [{"architecture": 0, "date": "2026-08-22 04:42:58.449533", "git": 0, "id": 1, "networking": 0, "pods": 5, "rbac": 0, "services": 0, "storage": 0}];
+
+        new Chart(document.getElementById('progress'), {
+            type: 'line',
+            data: {
+                labels: snapshots.map(s => s.date.split('T')[0]),
+                datasets: labels.map((k, i) => ({
+                    label: k,
+                    data: snapshots.map(s => s[k]),
+                    borderWidth: 2,
+                    tension: 0.3
+                }))
+            },
+            options: {
+                scales: { y: { min: 0, max: 100 } },
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -5,27 +5,14 @@ on:
     branches:
       - main
     paths:
-      - 'cli/**'
       - 'public/**'
-      - 'private/dojo.db'  # Optionnel, pour mettre à jour les stats
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Install Dojo CLI
-        run: |
-          pip install --upgrade pip
-          pip install -e .
-      - name: Build Dashboard
-        env:
-          K8S_DOJO_HOME: .
-        run: |
-          dojo build-dashboard --output ./public
+
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
